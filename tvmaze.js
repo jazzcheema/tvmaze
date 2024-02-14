@@ -12,29 +12,26 @@ const $searchForm = $("#searchForm");
  *    (if no image URL given by API, put in a default image URL)
  */
 
-async function getShowsByTerm( /* term */) {
+async function getShowsByTerm(searchTerm) {
   // ADD: Remove placeholder & make request to TVMaze search shows API.
-
+  const params = new URLSearchParams({ q: searchTerm });
+  const url = `https://api.tvmaze.com/singlesearch/shows?`;
+  const response = await fetch(`${url}${params}`);
+  const showData = await response.json();
+  const { id, name, summary, image } = showData;
+  console.log(showData);
+  console.log('typeof', typeof showData);
   return [
     {
-      id: 1767,
-      name: "The Bletchley Circle",
+      id: id,
+      name: name,
       summary:
-        `<p><b>The Bletchley Circle</b> follows the journey of four ordinary 
-           women with extraordinary skills that helped to end World War II.</p>
-         <p>Set in 1952, Susan, Millie, Lucy and Jean have returned to their 
-           normal lives, modestly setting aside the part they played in 
-           producing crucial intelligence, which helped the Allies to victory 
-           and shortened the war. When Susan discovers a hidden code behind an
-           unsolved murder she is met by skepticism from the police. She 
-           quickly realises she can only begin to crack the murders and bring
-           the culprit to justice with her former friends.</p>`,
+        summary,
       image:
-          "http://static.tvmaze.com/uploads/images/medium_portrait/147/369403.jpg"
+        image.medium
     }
-  ]
+  ];
 }
-
 
 /** Given list of shows, create markup for each and append to DOM.
  *
@@ -48,9 +45,9 @@ function displayShows(shows) {
     const $show = $(`
         <div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
-           <img 
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg" 
-              alt="Bletchly Circle San Francisco" 
+           <img
+              src="${show.image}"
+              alt="${show.name}"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
@@ -62,7 +59,7 @@ function displayShows(shows) {
          </div>
        </div>
       `);
-
+    console.log(show.name);
     $showsList.append($show);
   }
 }
@@ -71,7 +68,7 @@ function displayShows(shows) {
 /** Handle search form submission: get shows from API and display.
  *    Hide episodes area (that only gets shown if they ask for episodes)
  */
-
+//CONDUCTOR
 async function searchShowsAndDisplay() {
   const term = $("#searchForm-term").val();
   const shows = await getShowsByTerm(term);
@@ -80,7 +77,7 @@ async function searchShowsAndDisplay() {
   displayShows(shows);
 }
 
-$searchForm.on("submit", async function handleSearchForm (evt) {
+$searchForm.on("submit", async function handleSearchForm(evt) {
   evt.preventDefault();
   await searchShowsAndDisplay();
 });
