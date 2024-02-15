@@ -77,6 +77,7 @@ async function searchShowsAndDisplay() {
 $searchForm.on("submit", async function handleSearchForm(evt) {
   evt.preventDefault();
   await searchShowsAndDisplay();
+  $("#episodesList").empty();
 });
 
 
@@ -140,7 +141,8 @@ $showsList.on('click', '.Show-getEpisodes', function (event) {
 
 
 //this is just adding a class to our episode list to remove it once it's clicked
-//again-- so in a sense we are acting like it is toggling on/off.
+//again-- so in a sense we are acting like it is toggling on/off--> but it never
+//turns back on..
 function toggleUnsafe() {
   $('li').addClass('unsafe');
 }
