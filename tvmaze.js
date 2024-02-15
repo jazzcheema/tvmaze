@@ -3,7 +3,7 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
-
+const TV_URL = 'https://api.tvmaze.com/search/shows';
 
 /** Given a search term, search for tv shows that match that query.
  *
@@ -13,24 +13,20 @@ const $searchForm = $("#searchForm");
  */
 
 async function getShowsByTerm(searchTerm) {
-  // ADD: Remove placeholder & make request to TVMaze search shows API.
+
   const params = new URLSearchParams({ q: searchTerm });
-  const url = `https://api.tvmaze.com/singlesearch/shows?`;
-  const response = await fetch(`${url}${params}`);
+  const response = await fetch(`${TV_URL}?${params}`);
   const showData = await response.json();
-  const { id, name, summary, image } = showData;
-  console.log(showData);
-  console.log('typeof', typeof showData);
-  return [
-    {
-      id: id,
-      name: name,
-      summary:
-        summary,
-      image:
-        image.medium
-    }
-  ];
+
+  const neededShowData = showData.map(({ show }) => ({
+    name: show.name,
+    id: show.id,
+    summary: show.summary,
+    image: show.image === null ? 'https://tinyurl.com/tv-missing'
+      : show.image.medium
+  }));
+
+  return neededShowData;
 }
 
 /** Given list of shows, create markup for each and append to DOM.
@@ -40,8 +36,8 @@ async function getShowsByTerm(searchTerm) {
 
 function displayShows(shows) {
   $showsList.empty();
-
   for (const show of shows) {
+
     const $show = $(`
         <div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
@@ -49,7 +45,7 @@ function displayShows(shows) {
               src="${show.image}"
               alt="${show.name}"
               class="w-25 me-3">
-           <div class="media-body">
+              <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
              <button class="btn btn-outline-light btn-sm Show-getEpisodes">
@@ -59,8 +55,8 @@ function displayShows(shows) {
          </div>
        </div>
       `);
-    console.log(show.name);
     $showsList.append($show);
+
   }
 }
 
@@ -68,8 +64,9 @@ function displayShows(shows) {
 /** Handle search form submission: get shows from API and display.
  *    Hide episodes area (that only gets shown if they ask for episodes)
  */
-//CONDUCTOR
+//CONDUCTOR FUNCTION
 async function searchShowsAndDisplay() {
+
   const term = $("#searchForm-term").val();
   const shows = await getShowsByTerm(term);
 
