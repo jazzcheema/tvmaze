@@ -70,7 +70,7 @@ async function searchShowsAndDisplay() {
   const term = $("#searchForm-term").val();
   const shows = await getShowsByTerm(term);
 
-  $episodesArea.hide();
+
   displayShows(shows);
 }
 
@@ -86,7 +86,7 @@ $searchForm.on("submit", async function handleSearchForm(evt) {
 
 
 //this is used to input our unique show ID to retrieve data about that
-//specific show, and returns a
+//specific show, and returns an array ob objects
 async function getEpisodesOfShow(id) {
 
   const response = await fetch(`${TV_URL}shows/${id}/episodes`);
@@ -104,13 +104,14 @@ function displayEpisodes(episodes) {
 
   for (const episode of episodes) {
     console.log(episode.name);
-    const $episodeSection = $(`<li> Title: ${episode.name},
+    const $episodeSection = $(`<li class=""> Title: ${episode.name},
     Season: ${episode.season},
     Episode Number: ${episode.number} </li> `);
 
     $('#episodesList').append($episodeSection);
   }
   $("#episodesArea").show();
+
 }
 
 
@@ -134,11 +135,20 @@ let episodeButtonId;
 $showsList.on('click', '.Show-getEpisodes', function (event) {
   const showId = $(event.target).closest(".Show").data("showId");
   episodeButtonId = showId;
-  // console.log(episodeButtonId);
+  toggleUnsafe();
 });
+
+
+//this is just adding a class to our episode list to remove it once it's clicked
+//again-- so in a sense we are acting like it is toggling on/off.
+function toggleUnsafe() {
+  $('li').addClass('unsafe');
+}
 
 //on click --> return our new controller func.
 $showsList.on("click", getEpisodesInfoAndDisplay)
+
+
 
 
 
