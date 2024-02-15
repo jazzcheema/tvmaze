@@ -3,7 +3,7 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
-const TV_URL = 'https://api.tvmaze.com/search/shows';
+const TV_URL = 'https://api.tvmaze.com/';
 
 /** Given a search term, search for tv shows that match that query.
  *
@@ -15,7 +15,7 @@ const TV_URL = 'https://api.tvmaze.com/search/shows';
 async function getShowsByTerm(searchTerm) {
 
   const params = new URLSearchParams({ q: searchTerm });
-  const response = await fetch(`${TV_URL}?${params}`);
+  const response = await fetch(`${TV_URL}search/shows?${params}`);
   const showData = await response.json();
 
   const neededShowData = showData.map(({ show }) => ({
@@ -84,10 +84,61 @@ $searchForm.on("submit", async function handleSearchForm(evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
 
-/** Write a clear docstring for this function... */
+//this is used to input our unique show ID to retrieve data about that
+//specific show, and returns a
+async function getEpisodesOfShow(id) {
 
-// function displayEpisodes(episodes) { }
+  const response = await fetch(`${TV_URL}shows/${id}/episodes`);
+  const returnedEpisodeInfo = await response.json();
 
-// add other functions that will be useful / match our structure & design
+  return returnedEpisodeInfo;
+}
+
+
+/** this is taking our array list of objects, looping through them and
+ * returning info of the episodes--> appends to episodelist area
+*/
+
+function displayEpisodes(episodes) {
+
+  for (const episode of episodes) {
+    console.log(episode.name);
+    const $episodeSection = $(`<li> Title: ${episode.name},
+    Season: ${episode.season},
+    Episode Number: ${episode.number} </li> `);
+
+    $('#episodesList').append($episodeSection);
+  }
+  $("#episodesArea").show();
+}
+
+
+//our new/latest controller function ! This grabs episode data, specific to
+//that show with ID obtained from the event listener --> returns an array of
+//objects to be looped over, returned and appended to the dom. This is called
+//in a separate event listener from grabbing show ID.
+//
+async function getEpisodesInfoAndDisplay() {
+
+  const episodes = await getEpisodesOfShow(episodeButtonId);
+  const episodeDomInfo = displayEpisodes(episodes);
+
+  return episodeDomInfo;
+}
+
+//button below each card 'episodes' needs an event listener
+let episodeButtonId;
+
+//button below each card 'episodes' needs an event listener
+$showsList.on('click', '.Show-getEpisodes', function (event) {
+  const showId = $(event.target).closest(".Show").data("showId");
+  episodeButtonId = showId;
+  // console.log(episodeButtonId);
+});
+
+//on click --> return our new controller func.
+$showsList.on("click", getEpisodesInfoAndDisplay)
+
+
+
